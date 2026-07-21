@@ -1,15 +1,15 @@
 {
-  "name": "course-fee-calculator",
-  "version": "1.0.0",
-  "description": "课程金额分期计算器 - 支持 USD/MYR/SGD，带教师账号登录和计算记录保存",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "lowdb": "^1.0.0"
-  }
+    "name": "course-fee-calculator",
+    "version": "1.0.0",
+    "description": "课程金额分期计算器 - 支持 USD/MYR/SGD，带教师账号登录和计算记录保存",
+    "main": "server.js",
+    "scripts": {
+          "start": "node server.js"
+    },
+    "dependencies": {
+          "bcryptjs": "^2.4.3",
+          "express": "^4.19.2",
+          "jsonwebtoken": "^9.0.2",
+          "pg": "^8.11.5"
+    }
 }
