@@ -1,0 +1,213 @@
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --bg: #f5f6fa;
+  --card: #ffffff;
+  --border: #e2e5ec;
+  --text: #1f2430;
+  --muted: #6b7280;
+  --danger: #dc2626;
+  --success: #16a34a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.center-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 360px;
+}
+
+.login-card h1 {
+  font-size: 20px;
+  margin: 0 0 4px;
+}
+.login-card p.sub {
+  color: var(--muted);
+  margin: 0 0 20px;
+  font-size: 13px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+input, select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 14px;
+  background: #fff;
+  color: var(--text);
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  width: 100%;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+
+.btn-secondary {
+  background: #eef0f5;
+  color: var(--text);
+}
+.btn-secondary:hover { background: #e2e5ec; }
+
+.btn-danger {
+  background: #fde8e8;
+  color: var(--danger);
+}
+.btn-danger:hover { background: #fbd3d3; }
+
+.error {
+  color: var(--danger);
+  font-size: 13px;
+  margin: -6px 0 12px;
+  min-height: 16px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+.topbar .brand { font-weight: 700; font-size: 16px; }
+.topbar .who { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); }
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+  display: grid;
+  gap: 20px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+h2 { font-size: 16px; margin: 0 0 16px; }
+h3 { font-size: 14px; margin: 20px 0 10px; color: var(--muted); }
+
+.result-box {
+  background: #f0f6ff;
+  border: 1px solid #cfe0fb;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 8px;
+}
+.result-box .total {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 4px 0;
+}
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 13px;
+}
+.breakdown-table th, .breakdown-table td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+table.list {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+table.list th, table.list td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+}
+table.list th { color: var(--muted); font-weight: 600; }
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.tag-USD { background: #e6f4ea; color: #1e7d3c; }
+.tag-SGD { background: #fff4e0; color: #b26a00; }
+.tag-MYR { background: #eee6ff; color: #6b3fd4; }
+
+.hint { font-size: 12px; color: var(--muted); margin: -8px 0 14px; }
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.small-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.hidden { display: none !important; }
+
+.field-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.field-row > div { flex: 1; }

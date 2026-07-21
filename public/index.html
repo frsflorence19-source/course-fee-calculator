@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>登录 - 课程金额计算器</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="center-page">
+  <div class="card login-card">
+    <h1>课程金额计算器</h1>
+    <p class="sub">请输入账号密码登录</p>
+    <form id="loginForm">
+      <label>用户名</label>
+      <input id="username" autocomplete="username" required />
+      <label>密码</label>
+      <input id="password" type="password" autocomplete="current-password" required />
+      <div class="error" id="err"></div>
+      <button class="btn-primary" type="submit">登录</button>
+    </form>
+  </div>
+</div>
+<script>
+  // 已登录则直接跳转
+  if (localStorage.getItem('token')) {
+    window.location.href = 'dashboard.html';
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const errEl = document.getElementById('err');
+    errEl.textContent = '';
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '登录失败');
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      errEl.textContent = err.message;
+    }
+  });
+</script>
+</body>
+</html>
