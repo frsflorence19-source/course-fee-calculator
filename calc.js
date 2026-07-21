@@ -1,7 +1,7 @@
 // 课程金额计算核心逻辑（前后端共用规则，这里是后端版本，用于校验/落库）
 //
 // 规则：
-// - USD：分期数 1-9。1-3 期手续费 +50 USD，4-7 期 +60 USD，8-9 期 +80 USD（整单只加一次，不是每期都加）
+// - USD：分期数 1 起不设上限。1-3 期手续费 +50 USD，4-7 期 +60 USD，8 期及以上 +80 USD（整单只加一次，不是每期都加）
 //        总额 = Main Amount + 手续费；每期应付 = 总额 / 分期数
 // - SGD：分期数由用户自填（正整数）。手续费固定 +40 SGD（整单只加一次）
 //        总额 = Main Amount + 40；每期应付 = 总额 / 分期数
@@ -11,7 +11,7 @@
 function usdSurcharge(installments) {
   if (installments >= 1 && installments <= 3) return 50;
   if (installments >= 4 && installments <= 7) return 60;
-  if (installments >= 8 && installments <= 9) return 80;
+  if (installments >= 8) return 80;
   return null; // 超出定义范围
 }
 
@@ -23,8 +23,8 @@ function calculate({ currency, mainAmount, installments, rate }) {
 
   if (currency === 'USD') {
     installments = parseInt(installments, 10);
-    if (!Number.isInteger(installments) || installments < 1 || installments > 9) {
-      throw new Error('USD 分期数必须是 1 到 9 之间的整数');
+    if (!Number.isInteger(installments) || installments < 1) {
+      throw new Error('USD 分期数必须是大于等于 1 的整数');
     }
     const surcharge = usdSurcharge(installments);
     const total = mainAmount + surcharge;
