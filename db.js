@@ -1,50 +1,78 @@
-const path = require('path');
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
-const low = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
 
-const DB_FILE = process.env.DB_FILE || path.join(__dirname, 'db.json');
-const adapter = new FileSync(DB_FILE);
-const db = low(adapter);
-
-db.defaults({ users: [], records: [] }).write();
-
-// 首次启动自动建一个管理员账号
-if (db.get('users').isEmpty().value()) {
-  const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-  const passwordHash = bcrypt.hashSync(adminPassword, 10);
-  db.get('users')
-    .push({
-      id: 1,
-      username: adminUsername,
-      passwordHash,
-      role: 'admin',
-      isOwner: true,
-      createdAt: new Date().toISOString(),
-    })
-    .write();
-  console.log('======================================');
-  console.log('已自动创建管理员账号：');
-  console.log('  用户名:', adminUsername);
-  console.log('  密码  :', adminPassword);
-  console.log('登录后请尽快在"修改密码"里改掉默认密码。');
-  console.log('======================================');
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+    console.warn(
+          '警告：未设置 DATABASE_URL 环境变量。请在 Render 的 Environment 里添加 DATABASE_URL（指向你创建的 Postgres 数据库），否则数据库操作会全部失败。'
+        );
 }
 
-// 迁移：确保有且仅有最早的管理员账号是"主账号"(owner)。
-// 只有主账号能看到/管理"教师账号管理"面板，其他管理员账号即使 role 是 admin 也看不到。
-if (!db.get('users').find({ isOwner: true }).value()) {
-  const admins = db.get('users').filter({ role: 'admin' }).value().sort((a, b) => a.id - b.id);
-  if (admins.length) {
-    db.get('users').find({ id: admins[0].id }).assign({ isOwner: true }).write();
-    console.log(`已将账号 "${admins[0].username}" 设为主账号(owner)，只有它能管理教师账号列表。`);
-  }
+const pool = new Pool({
+    connectionString,
+    ssl: connectionString ? { rejectUnauthorized: false } : undefined,
+});
+
+async function init() {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS users (
+              id SERIAL PRIMARY KEY,
+                    username TEXT UNIQUE NOT NULL,
+                          password_hash TEXT NOT NULL,
+                                role TEXT NOT NULL DEFAULT 'teacher',
+                                      is_owner BOOLEAN NOT NULL DEFAULT false,
+                                            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+                                                );
+                                                  `);
+
+  await pool.query(`
+      CREATE TABLE IF NOT EXISTS records (
+            id SERIAL PRIMARY KEY,
+                  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        username TEXT NOT NULL,
+                              note TEXT DEFAULT '',
+                                    currency TEXT NOT NULL,
+                                          main_amount NUMERIC NOT NULL,
+                                                deposit NUMERIC NOT NULL DEFAULT 0,
+                                                      is_revision BOOLEAN NOT NULL DEFAULT false,
+                                                            installments INTEGER,
+                                                                  rate NUMERIC,
+                                                                        surcharge NUMERIC NOT NULL DEFAULT 0,
+                                                                              total NUMERIC NOT NULL,
+                                                                                    per_installment NUMERIC,
+                                                                                          breakdown JSONB,
+                                                                                                created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+                                                                                                    );
+                                                                                                      `);
+
+  const { rows } = await pool.query('SELECT COUNT(*)::int AS count FROM users');
+    if (rows[0].count === 0) {
+          const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+          const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+          const passwordHash = bcrypt.hashSync(adminPassword, 10);
+          await pool.query(
+                  'INSERT INTO users (username, password_hash, role, is_owner) VALUES ($1, $2, $3, true)',
+                  [adminUsername, passwordHash, 'admin']
+                );
+          console.log('======================================');
+          console.log('已自动创建管理员账号（主账号）：');
+          console.log('  用户名:', adminUsername);
+          console.log('  密码  :', adminPassword);
+          console.log('登录后请尽快在"修改密码"里改掉默认密码。');
+          console.log('======================================');
+    } else {
+          // 迁移：确保有且仅有一个主账号(owner)，取最早创建的管理员账号
+      const ownerCheck = await pool.query('SELECT id FROM users WHERE is_owner = true LIMIT 1');
+          if (ownerCheck.rows.length === 0) {
+                  const admins = await pool.query(
+                            "SELECT id, username FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1"
+                          );
+                  if (admins.rows.length) {
+                            await pool.query('UPDATE users SET is_owner = true WHERE id = $1', [admins.rows[0].id]);
+                            console.log(`已将账号 "${admins.rows[0].username}" 设为主账号(owner)，只有它能管理教师账号列表。`);
+                  }
+          }
+    }
 }
 
-function nextId(collectionName) {
-  const items = db.get(collectionName).value();
-  return items.length ? Math.max(...items.map((i) => i.id)) + 1 : 1;
-}
-
-module.exports = { db, nextId };
+module.exports = { pool, init };
