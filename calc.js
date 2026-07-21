@@ -5,19 +5,18 @@ function usdSurcharge(installments) {
   return null;
 }
 
-function roundMyrEndInDigit(value, targetDigit) {
+function roundMyrEndIn7(value) {
   const base = Math.floor(value);
   const onesDigit = base % 10;
-  if (onesDigit >= 1 && onesDigit <= targetDigit) return base - onesDigit + targetDigit;
+  if (onesDigit >= 1 && onesDigit <= 7) return base - onesDigit + 7;
   return Math.round(value);
 }
 
-function roundMyrEndIn7(value) {
-  return roundMyrEndInDigit(value, 7);
-}
-
 function roundMyrEndIn9(value) {
-  return roundMyrEndInDigit(value, 9);
+  const base = Math.floor(value);
+  const onesDigit = base % 10;
+  if (onesDigit === 9) return base;
+  return base - onesDigit + 9;
 }
 
 function calculate({ currency, mainAmount, installments, rate, deposit, isRevision }) {
