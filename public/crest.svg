@@ -1,0 +1,38 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e6c988" />
+      <stop offset="50%" stop-color="#c8a25c" />
+      <stop offset="100%" stop-color="#a4822f" />
+    </linearGradient>
+  </defs>
+
+  <!-- outer circle -->
+  <circle cx="100" cy="100" r="92" fill="none" stroke="url(#goldGrad)" stroke-width="2"/>
+  <circle cx="100" cy="100" r="84" fill="none" stroke="url(#goldGrad)" stroke-width="1"/>
+
+  <!-- laurel left -->
+  <g stroke="url(#goldGrad)" stroke-width="2" fill="none" stroke-linecap="round">
+    <path d="M60 150 C40 140 32 120 34 98 C36 76 48 58 62 46"/>
+    <path d="M42 132 L30 128 M40 122 L27 119 M40 111 L26 110 M41 100 L27 101 M44 89 L31 87 M49 79 L37 74 M55 69 L45 63"/>
+  </g>
+  <!-- laurel right -->
+  <g stroke="url(#goldGrad)" stroke-width="2" fill="none" stroke-linecap="round">
+    <path d="M140 150 C160 140 168 120 166 98 C164 76 152 58 138 46"/>
+    <path d="M158 132 L170 128 M160 122 L173 119 M160 111 L174 110 M159 100 L173 101 M156 89 L169 87 M151 79 L163 74 M145 69 L155 63"/>
+  </g>
+
+  <!-- shield -->
+  <path d="M100 52 L134 64 V100 C134 126 118 144 100 152 C82 144 66 126 66 100 V64 Z"
+        fill="#120f0a" stroke="url(#goldGrad)" stroke-width="2"/>
+
+  <!-- mountains / growth motif -->
+  <path d="M74 118 L90 96 L100 108 L112 88 L128 118 Z" fill="none" stroke="url(#goldGrad)" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- rising sun -->
+  <circle cx="100" cy="86" r="7" fill="url(#goldGrad)"/>
+  <g stroke="url(#goldGrad)" stroke-width="1.5">
+    <line x1="100" y1="70" x2="100" y2="75"/>
+    <line x1="86" y1="76" x2="90" y2="79"/>
+    <line x1="114" y1="76" x2="110" y2="79"/>
+  </g>
+</svg>
