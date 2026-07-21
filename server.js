@@ -15,9 +15,11 @@ if (!process.env.JWT_SECRET) {
 }
 
 function sign(user) {
-  return jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, {
-    expiresIn: '30d',
-  });
+  return jwt.sign(
+    { id: user.id, username: user.username, role: user.role, isOwner: !!user.isOwner },
+    JWT_SECRET,
+    { expiresIn: '30d' }
+  );
 }
 
 function auth(req, res, next) {
@@ -37,6 +39,11 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+function requireOwner(req, res, next) {
+  if (!req.user.isOwner) return res.status(403).json({ error: '仅主账号可操作' });
+  next();
+}
+
 // ---------- Auth ----------
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body || {};
@@ -45,7 +52,10 @@ app.post('/api/login', (req, res) => {
     return res.status(401).json({ error: '用户名或密码错误' });
   }
   const token = sign(user);
-  res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+  res.json({
+    token,
+    user: { id: user.id, username: user.username, role: user.role, isOwner: !!user.isOwner },
+  });
 });
 
 app.get('/api/me', auth, (req, res) => {
@@ -68,16 +78,22 @@ app.post('/api/change-password', auth, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---------- Users (admin only) ----------
-app.get('/api/users', auth, requireAdmin, (req, res) => {
+// ---------- Users (owner only) ----------
+app.get('/api/users', auth, requireOwner, (req, res) => {
   const users = db
     .get('users')
-    .map((u) => ({ id: u.id, username: u.username, role: u.role, createdAt: u.createdAt }))
+    .map((u) => ({
+      id: u.id,
+      username: u.username,
+      role: u.role,
+      isOwner: !!u.isOwner,
+      createdAt: u.createdAt,
+    }))
     .value();
   res.json({ users });
 });
 
-app.post('/api/users', auth, requireAdmin, (req, res) => {
+app.post('/api/users', auth, requireOwner, (req, res) => {
   const { username, password, role } = req.body || {};
   if (!username || !password) return res.status(400).json({ error: '用户名和密码不能为空' });
   if (db.get('users').find({ username }).value()) {
@@ -94,13 +110,12 @@ app.post('/api/users', auth, requireAdmin, (req, res) => {
   res.json({ user: { id: user.id, username: user.username, role: user.role } });
 });
 
-app.delete('/api/users/:id', auth, requireAdmin, (req, res) => {
+app.delete('/api/users/:id', auth, requireOwner, (req, res) => {
   const id = Number(req.params.id);
   if (id === req.user.id) return res.status(400).json({ error: '不能删除自己' });
-  const admins = db.get('users').filter({ role: 'admin' }).value();
   const target = db.get('users').find({ id }).value();
-  if (target && target.role === 'admin' && admins.length <= 1) {
-    return res.status(400).json({ error: '至少保留一个管理员账号' });
+  if (target && target.isOwner) {
+    return res.status(400).json({ error: '不能删除主账号' });
   }
   db.get('users').remove({ id }).write();
   res.json({ ok: true });
