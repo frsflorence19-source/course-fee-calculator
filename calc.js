@@ -9,7 +9,7 @@ function roundMyrEndInDigit(value, targetDigit) {
   const base = Math.floor(value);
   const onesDigit = base % 10;
   if (onesDigit >= 1 && onesDigit <= targetDigit) return base - onesDigit + targetDigit;
-  return value;
+  return Math.round(value);
 }
 
 function roundMyrEndIn7(value) {
