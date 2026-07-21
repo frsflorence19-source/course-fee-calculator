@@ -25,7 +25,7 @@ function fmt(n) {
 }
 
 // ---------- Top bar ----------
-document.getElementById('whoami').textContent = `${currentUser.username}${currentUser.role === 'admin' ? '（管理员）' : ''}`;
+document.getElementById('whoami').textContent = `${currentUser.username}${currentUser.isOwner ? '（主账号）' : currentUser.role === 'admin' ? '（管理员）' : ''}`;
 document.getElementById('logoutBtn').addEventListener('click', () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
@@ -48,8 +48,10 @@ document.getElementById('pwBtn').addEventListener('click', async () => {
 });
 
 if (currentUser.role === 'admin') {
-  document.getElementById('adminCard').classList.remove('hidden');
   document.getElementById('adminFilterWrap').classList.remove('hidden');
+}
+if (currentUser.isOwner) {
+  document.getElementById('adminCard').classList.remove('hidden');
 }
 
 // ---------- Calculator ----------
@@ -78,10 +80,10 @@ function updateCurrencyUI() {
     installmentField.classList.remove('hidden');
     rateField.classList.add('hidden');
     if (c === 'USD') {
-      installmentsEl.max = 9;
-      installmentsEl.placeholder = '1-9';
-      installmentLabel.textContent = '分期数（1-9 期）';
-      installmentHint.textContent = 'USD：1-3 期加 USD 50，4-7 期加 USD 60，8-9 期加 USD 80（整单只加一次）';
+      installmentsEl.removeAttribute('max');
+      installmentsEl.placeholder = '例如 6';
+      installmentLabel.textContent = '分期数';
+      installmentHint.textContent = 'USD：1-3 期加 USD 50，4-7 期加 USD 60，8 期及以上加 USD 80（整单只加一次）';
     } else {
       installmentsEl.removeAttribute('max');
       installmentsEl.placeholder = '例如 6';
@@ -211,8 +213,8 @@ async function loadRecords() {
 }
 loadRecords();
 
-// ---------- Admin: user management ----------
-if (currentUser.role === 'admin') {
+// ---------- Admin: user management (仅主账号 owner 可见) ----------
+if (currentUser.isOwner) {
   const usersWrap = document.getElementById('usersWrap');
   const userErr = document.getElementById('userErr');
 
@@ -222,9 +224,10 @@ if (currentUser.role === 'admin') {
       const { users } = await api('/api/users');
       let html = '<table class="list"><thead><tr><th>用户名</th><th>角色</th><th>创建时间</th><th></th></tr></thead><tbody>';
       users.forEach((u) => {
+        const roleLabel = u.isOwner ? '主账号' : u.role === 'admin' ? '管理员' : '老师';
         html += `<tr>
           <td>${u.username}</td>
-          <td>${u.role === 'admin' ? '管理员' : '老师'}</td>
+          <td>${roleLabel}</td>
           <td>${new Date(u.createdAt).toLocaleString()}</td>
           <td>${u.id === currentUser.id ? '' : `<button class="btn-danger small-btn" data-uid="${u.id}">删除</button>`}</td>
         </tr>`;
